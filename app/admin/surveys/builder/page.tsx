@@ -748,9 +748,12 @@ function SurveyBuilderContent() {
     const currentNode = nodes.find((n) => n.id === previewCurrentNodeId)
     if (!currentNode) return
 
-    if (currentNode.data.required && !previewAnswers[previewCurrentNodeId]) {
-      alert("This question is required")
-      return
+    if (currentNode.data.required) {
+      const answer = previewAnswers[previewCurrentNodeId]
+      if (answer === undefined || answer === null || answer === "") {
+        alert("This question is required")
+        return
+      }
     }
 
     if (currentNode.data.type === "email" && previewAnswers[previewCurrentNodeId]) {
@@ -781,7 +784,8 @@ function SurveyBuilderContent() {
     if (currentNode.data.type === "radio") {
       const selectedOption = previewAnswers[previewCurrentNodeId]
       if (selectedOption !== undefined) {
-        nextEdge = edges.find((e) => e.source === previewCurrentNodeId && e.sourceHandle === `option-${selectedOption}`)
+        const fullHandleId = `${previewCurrentNodeId}-option-${selectedOption}`
+        nextEdge = edges.find((e) => e.source === previewCurrentNodeId && e.sourceHandle === fullHandleId)
       }
     } else {
       nextEdge = edges.find((e) => e.source === previewCurrentNodeId)
@@ -981,9 +985,9 @@ function SurveyBuilderContent() {
   }
 
   const orderedQuestions = buildOrderedQuestionList()
-  const currentPreviewIndex = previewVisitedNodes.indexOf(previewCurrentNodeId || "")
-  const progressPercentage =
-    previewVisitedNodes.length > 0 ? (currentPreviewIndex / previewVisitedNodes.length) * 100 : 0
+  const totalQuestions = orderedQuestions.filter((n) => n.data.type !== "end").length
+  const answeredQuestions = Object.keys(previewAnswers).length
+  const progressPercentage = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0
 
   const getClosestHandle = (sourceNode: Node, targetNode: Node) => {
     const dx = targetNode.position.x - sourceNode.position.x
