@@ -6,11 +6,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Calendar, Plus, Search, Filter, MoreVertical, Users, MapPin, Clock, ArrowLeft } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function EventsPage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
 
   const mockEvents = [
     {
@@ -69,6 +83,34 @@ export default function EventsPage() {
       default:
         return "default"
     }
+  }
+
+  const handleEdit = (eventId: number) => {
+    console.log("[v0] Edit event:", eventId)
+    router.push(`/admin/events/${eventId}/edit`)
+  }
+
+  const handleDuplicate = (eventId: number) => {
+    console.log("[v0] Duplicate event:", eventId)
+    // TODO: Implement duplicate logic
+    alert(`이벤트 #${eventId}를 복제합니다.`)
+  }
+
+  const handleDeleteClick = (eventId: number) => {
+    setSelectedEventId(eventId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    console.log("[v0] Delete event:", selectedEventId)
+    // TODO: Implement delete logic
+    alert(`이벤트 #${selectedEventId}를 삭제합니다.`)
+    setDeleteDialogOpen(false)
+    setSelectedEventId(null)
+  }
+
+  const handleViewDetails = (eventId: number) => {
+    router.push(`/admin/events/${eventId}`)
   }
 
   return (
@@ -140,9 +182,11 @@ export default function EventsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>수정</DropdownMenuItem>
-                      <DropdownMenuItem>복제</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">삭제</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEdit(event.id)}>수정</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDuplicate(event.id)}>복제</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(event.id)}>
+                        삭제
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -162,7 +206,11 @@ export default function EventsPage() {
                   <span className="text-muted-foreground">/ {event.capacity}</span>
                 </div>
                 <div className="pt-2">
-                  <Button variant="outline" className="w-full bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-transparent"
+                    onClick={() => handleViewDetails(event.id)}
+                  >
                     상세 보기
                   </Button>
                 </div>
@@ -171,6 +219,26 @@ export default function EventsPage() {
           ))}
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>이벤트를 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              이 작업은 되돌릴 수 없습니다. 이벤트와 관련된 모든 예약 정보가 영구적으로 삭제됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
