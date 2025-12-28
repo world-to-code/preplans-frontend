@@ -142,6 +142,7 @@ export default function EventsPage() {
               이벤트 생성
             </Button>
           </Link>
+          {/* </CHANGE> */}
         </div>
 
         {/* Filters */}

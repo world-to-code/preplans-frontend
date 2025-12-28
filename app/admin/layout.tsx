@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Settings,
   FolderKanban,
+  Shield,
 } from "lucide-react"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -23,12 +24,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isSurveyBuilder = pathname?.includes("/surveys/builder") || pathname?.includes("/surveys/create")
 
   const navItems = [
-    { label: "Projects", icon: FolderKanban, href: "/admin/projects" },
     { label: "Overview", icon: LayoutDashboard, href: "/admin" },
+    { label: "Projects", icon: FolderKanban, href: "/admin/projects" },
     { label: "Events", icon: Calendar, href: "/admin/events" },
     { label: "Bookings", icon: CheckCircle2, href: "/admin/bookings" },
     { label: "Surveys", icon: ClipboardList, href: "/admin/surveys" },
-    { label: "Users & Groups", icon: Users, href: "/admin/users" },
+    {
+      label: "Users & Groups",
+      icon: Users,
+      href: "/admin/users",
+      subItems: [{ label: "Security & Access", icon: Shield, href: "/admin/users/security" }],
+    },
     { label: "Reports", icon: FileText, href: "/admin/reports" },
     { label: "Notifications", icon: Bell, href: "/admin/notifications" },
   ]
@@ -58,6 +64,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
             {navItems.map((item) => {
+              if ("subItems" in item && item.subItems) {
+                const isActive = pathname?.startsWith(item.href)
+                return (
+                  <div key={item.href} className="space-y-1">
+                    <Button
+                      variant={isActive ? "secondary" : "ghost"}
+                      className="w-full justify-start gap-3"
+                      onClick={() => router.push(item.href)}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </Button>
+                    {item.subItems.map((subItem) => {
+                      const isSubActive = pathname === subItem.href
+                      return (
+                        <Button
+                          key={subItem.href}
+                          variant={isSubActive ? "secondary" : "ghost"}
+                          className="w-full justify-start gap-3 pl-12 text-sm"
+                          onClick={() => router.push(subItem.href)}
+                        >
+                          {subItem.icon && <subItem.icon className="h-4 w-4" />}
+                          {subItem.label}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                )
+              }
+
               const isActive = pathname === item.href || pathname?.startsWith(item.href + "/")
               return (
                 <Button
@@ -75,7 +111,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Settings */}
           <div className="border-t border-border p-4">
-            <Button variant="ghost" className="w-full justify-start gap-3">
+            <Button
+              variant={pathname === "/admin/settings" ? "secondary" : "ghost"}
+              className="w-full justify-start gap-3"
+              onClick={() => router.push("/admin/settings")}
+            >
               <Settings className="h-4 w-4" />
               Settings
             </Button>

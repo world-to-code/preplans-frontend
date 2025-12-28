@@ -50,6 +50,12 @@ const mockAssignees = [
   { id: "staff-1", name: "정직원", role: "staff" as const, email: "jung@univ.edu" },
 ]
 
+const mockProjects = [
+  { id: "1", title: "2025 신입생 프로그램" },
+  { id: "2", title: "교수 상담 시스템" },
+  { id: "3", title: "스터디룸 관리" },
+]
+
 export default function CreateEventPage() {
   const router = useRouter()
   const [category, setCategory] = useState<EventCategory>("reservation")
@@ -98,6 +104,8 @@ export default function CreateEventPage() {
 
   const [viewingConfig, setViewingConfig] = useState<EventDateConfig | null>(null)
   const [defaultCapacity, setDefaultCapacity] = useState(1)
+
+  const [selectedProject, setSelectedProject] = useState<string>("")
 
   const generateTimeSlots = () => {
     const slots: TimeSlot[] = []
@@ -188,6 +196,7 @@ export default function CreateEventPage() {
       targetAudience,
       bookingConstraints,
       recurrence,
+      selectedProject,
     })
     router.push("/admin/events")
   }
@@ -270,6 +279,28 @@ export default function CreateEventPage() {
               <CardTitle>기본 정보</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <Label>
+                  소속 프로젝트 <span className="text-destructive">*</span>
+                </Label>
+                <Select value={selectedProject} onValueChange={setSelectedProject}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="이벤트가 속할 프로젝트를 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">프로젝트 없음 (독립 이벤트)</SelectItem>
+                    {mockProjects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  프로젝트에 포함하면 통합 통계와 분석을 제공받을 수 있습니다
+                </p>
+              </div>
+              {/* </CHANGE> */}
               <div>
                 <Label>이벤트 제목</Label>
                 <Input placeholder="예: 2024학년도 1학기 교수 상담" />
